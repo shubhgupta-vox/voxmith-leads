@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contentTypeFor, fillCode, validateDuration, validateFile } from "./validate";
+import { contentTypeFor, countLabel, fillCode, slotsLeft, validateDuration, validateFile } from "./validate";
 
 const f = (name: string, size = 1000, type = "") => ({ name, type, size });
 
@@ -25,6 +25,15 @@ describe("validateFile", () => {
   });
 });
 
+describe("countLabel", () => {
+  it("reads N of 10 and flags full", () => {
+    expect(countLabel(3)).toBe("3 of 10");
+    expect(countLabel(10, 10)).toBe("10 of 10");
+    expect(slotsLeft(4)).toBe(6);
+    expect(slotsLeft(12)).toBe(0);
+  });
+});
+
 describe("fillCode", () => {
   const empty = Array(6).fill("");
   it("types a digit and advances", () => expect(fillCode(empty, 0, "4")).toMatchObject({ digits: ["4", "", "", "", "", ""], focus: 1 }));
@@ -33,6 +42,6 @@ describe("fillCode", () => {
     expect(r.digits.join("")).toBe("123456");
     expect(r.focus).toBe(5);
   });
-  it("paste in the middle truncates", () => expect(fillCode(empty, 4, "9999").digits.join("")).toBe("9999".slice(0, 2).padStart(6, " ").replace(/ /g, "") ? "9999".slice(0, 2) : ""));
+  it("paste in the middle truncates", () => expect(fillCode(empty, 4, "9999").digits).toEqual(["", "", "", "", "9", "9"]));
   it("clears on non-digit", () => expect(fillCode(["1", "2", "", "", "", ""], 1, "x").digits[1]).toBe(""));
 });

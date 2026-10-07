@@ -20,6 +20,9 @@ export function validateFile(f: { name: string; type: string; size: number }, ex
   return null;
 }
 
+export const countLabel = (n: number, max = LIMITS.maxFiles) => `${n} of ${max}`;
+export const slotsLeft = (n: number, max = LIMITS.maxFiles) => Math.max(0, max - n);
+
 export function validateDuration(seconds: number | null): string | null {
   if (seconds !== null && seconds > LIMITS.maxMinutes * 60) return `Too long (${Math.ceil(seconds / 60)} min). The limit is ${LIMITS.maxMinutes} minutes per call.`;
   return null;

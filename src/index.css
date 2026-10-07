@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #0258d6;
+  --color-brand-dark: #01459f;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body { @apply bg-white text-slate-800 antialiased; }
+:focus-visible { outline: 3px solid #0258d6; outline-offset: 2px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in { animation: fade-in 0.3s ease-out both; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .bar { transition: width 0.2s ease-out; }
+}
