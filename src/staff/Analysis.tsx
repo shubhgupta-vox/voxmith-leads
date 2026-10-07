@@ -72,7 +72,7 @@ function Body({ a }: { a: Analytics }) {
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-lg font-bold">Top requests</h3>
           {!auto.intents.length ? <p className="mt-1 text-sm">No requests identified.</p> : (
             <div className="mt-1 overflow-x-auto">
@@ -89,7 +89,7 @@ function Body({ a }: { a: Analytics }) {
             </div>
           )}
         </div>
-        <div>
+        <div className="min-w-0">
           <h3 className="text-lg font-bold">Caller sentiment</h3>
           {!s.scored_conversations ? <p className="mt-1 text-sm">No calls scored yet.</p> : (
             <>
