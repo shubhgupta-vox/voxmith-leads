@@ -34,7 +34,7 @@ export function probeDuration(file: File): Promise<number | null> {
     const a = new Audio();
     const url = URL.createObjectURL(file);
     const done = (v: number | null) => { URL.revokeObjectURL(url); resolve(v); };
-    const t = setTimeout(() => done(null), 5000);
+    const t = setTimeout(() => done(null), 2000);
     a.preload = "metadata";
     a.onloadedmetadata = () => { clearTimeout(t); done(Number.isFinite(a.duration) ? a.duration : null); };
     a.onerror = () => { clearTimeout(t); done(null); };

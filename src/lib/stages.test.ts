@@ -11,6 +11,9 @@ describe("leadMessage", () => {
   it("shows the expected delivery while work is pending", () => {
     expect(leadMessage("processing", "within 3 business days").body).toMatch(/within 3 business days/);
   });
+  it("does not claim a review when nothing was analysed", () => {
+    expect(leadMessage("in_review", "x", false).title).toMatch(/could not analyse/);
+  });
   it("says analysing only starts after email confirmation", () => {
     expect(leadMessage("awaiting_verification", "").body).toMatch(/confirm your email/);
   });

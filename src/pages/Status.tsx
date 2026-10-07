@@ -51,7 +51,7 @@ export default function StatusPage() {
   );
   if (!s) return <div className="space-y-3">{err ? <ErrorNote>{err}</ErrorNote> : <p aria-live="polite">Loading your status...</p>}</div>;
 
-  const msg = leadMessage(s.status, s.expected_delivery || TURNAROUND_FALLBACK);
+  const msg = leadMessage(s.status, s.expected_delivery || TURNAROUND_FALLBACK, s.files.some((f) => f.stage === "analysed"));
   const link = `${window.location.origin}/status#t=${token}`;
 
   return (
@@ -74,7 +74,7 @@ export default function StatusPage() {
                 <span className="min-w-0 truncate font-medium">{f.filename} <span className="text-sm font-normal text-slate-600">({fmtSize(f.size_bytes)})</span></span>
                 <span className={`text-sm font-medium ${isBad(f.stage) ? "text-red-700" : ""}`}>{fileLabel(f.stage, f.uploaded)}</span>
               </div>
-              {f.reason && <p className="mt-1 text-sm text-red-700">{f.reason}</p>}
+              {(f.reason || f.stage === "failed") && <p className="mt-1 text-sm text-red-700">{f.reason || "Something went wrong while processing this call."}</p>}
             </li>
           ))}
         </ul>
