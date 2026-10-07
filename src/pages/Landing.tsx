@@ -28,7 +28,6 @@ export default function Landing() {
           <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-700">
             <li>We only start analysing after you confirm your email.</li>
             <li>Calls are transcribed and analysed by automated tools, then reviewed by our team.</li>
-            <li>We keep your recordings so our team can review the analysis. You can ask us to delete everything at any time.</li>
             <li>You can delete your data at any time from your status page.</li>
           </ul>
         </div>
