@@ -7,11 +7,12 @@ import {
   FIELD_LABEL, MAX_INTENTS, OUTCOME_LABEL, REASON_LABEL, SENTIMENTS, type FieldName, type Fields,
   buildCorrection, changedFields, fmtValue, neighbour, reviewableIds, saveBlocker, shortcutFor,
 } from "../lib/staffLogic";
+import { OverviewTab, SentimentTab, TranscriptTab, ViolationsTab } from "./CallTabs";
 import { fmtDate } from "./Queue";
 import { useLoad, useMe } from "./Staff";
 
 const msg = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
-const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const TABS = ["Overview", "Transcript", "Sentiment", "Violations"] as const;
 const HELP: [string, string][] = [
   ["j / k", "Next / previous call of this lead"], ["Space", "Play / pause the audio"], ["[  ]", "Back / forward 5 seconds"],
   ["1 2 3 4", "Set outcome: resolved, handed off, dropped, no request"], ["e", "Toggle 'handed to a human'"],
@@ -76,6 +77,12 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
   const [saving, setSaving] = useState<FieldName | "review" | null>(null);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [help, setHelp] = useState(false);
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
+  const [ask, setAsk] = useState<"outcome" | "full" | null>(null);
+  const [rerun, setRerun] = useState(false);
+  const effKey = JSON.stringify(current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setDraft(current), [effKey]); // a re-run or save changed the stored values: show them
   const dirty = judged && changedFields(current, draft).length > 0;
   const next = neighbour(ids, cid, 1), prev = neighbour(ids, cid, -1);
 
@@ -89,6 +96,14 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
       setNote({ ok: true, text: `${FIELD_LABEL[f]} corrected. The call needs signing off again.` });
     } catch (e) { setNote({ ok: false, text: msg(e) }); }
     setSaving(null);
+  }
+  async function rejudge(full: boolean) {
+    setAsk(null); setRerun(true); setNote(null);
+    try {
+      await staffApi.rejudge(cid, full); await reload();
+      setNote({ ok: true, text: full ? "Re-ran the analysis including the intents. Check the values below." : "Re-ran the analysis. Check the values below." });
+    } catch (e) { setNote({ ok: false, text: msg(e) }); }
+    setRerun(false);
   }
   async function signOff() {
     if (dirty) return setNote({ ok: false, text: "You have unsaved changes. Save or discard them before signing off." });
@@ -126,7 +141,6 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
       onSave={() => void save(name)} onReset={() => setDraft((x) => ({ ...x, [name]: effective[name] }))}>{children}</FieldCard>
   );
   const seek = (t: number) => { if (audio.current) audio.current.currentTime = t; };
-  const lang = d.call.language;
 
   return (
     <>
@@ -147,28 +161,45 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
               ? <audio ref={audio} controls preload="metadata" src={d.audio_url} className="w-full" aria-label="Call audio" />
               : <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm">Audio deleted: the lead declined to let us keep recordings.</p>}
           </div>
-          <h2 id="tr" className="mt-2 text-lg font-bold">Transcript {lang && <span className="text-sm font-normal text-slate-600">(language: {lang})</span>}</h2>
-          {!d.conversation.turns.length ? <p className="mt-2">There is no transcript for this call.</p> : (
-            <ol className="mt-2 space-y-2">
-              {d.conversation.turns.map((t) => (
-                <li key={t.idx}>
-                  <button type="button" onClick={() => seek(t.offset_sec)} disabled={!d.audio_url} className={`block w-full rounded-lg p-2 text-left ${t.role === "user" ? "bg-slate-100" : "bg-blue-50"}`}>
-                    <span className="text-xs font-semibold text-slate-700">{t.role === "user" ? "Caller" : "Agent"} <span className="font-normal">{mmss(t.offset_sec)}</span></span>
-                    <span lang={lang ?? undefined} className="block whitespace-pre-wrap">{t.text}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          )}
+          <h2 id="tr" className="sr-only">Call analysis</h2>
+          <div role="tablist" aria-label="Call analysis" className="mt-2 flex flex-wrap gap-1 border-b border-slate-300">
+            {TABS.map((t) => (
+              <button key={t} type="button" role="tab" id={`tab-${t}`} aria-selected={tab === t} aria-controls="tabpanel" tabIndex={tab === t ? 0 : -1}
+                onClick={() => setTab(t)} onKeyDown={(e) => {
+                  const i = TABS.indexOf(tab) + (e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0);
+                  if (i !== TABS.indexOf(tab) && TABS[i]) { setTab(TABS[i]); setTimeout(() => document.getElementById(`tab-${TABS[i]}`)?.focus(), 0); }
+                }}
+                className={`min-h-11 rounded-t-lg px-3 font-semibold ${tab === t ? "border-x border-t border-slate-300 bg-white text-brand" : "text-slate-600 hover:bg-slate-50"}`}>{t}</button>
+            ))}
+          </div>
+          <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${tab}`} tabIndex={0} className="mt-3">
+            {tab === "Overview" && <OverviewTab d={d} />}
+            {tab === "Transcript" && <TranscriptTab d={d} seek={seek} canSeek={!!d.audio_url} />}
+            {tab === "Sentiment" && <SentimentTab d={d} />}
+            {tab === "Violations" && <ViolationsTab d={d} />}
+          </div>
         </section>
 
         <section aria-labelledby="jd" className="space-y-4">
           <h2 id="jd" className="text-lg font-bold">Judge output and corrections</h2>
-          {!judged && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">The automatic judge has not finished with this call yet, so there is nothing to correct or sign off. Reload in a minute.</p>}
+          {!judged && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">Analysing this call. The automatic judge has not finished, so there is nothing to correct or sign off yet. This page checks again every 5 seconds.</p>}
           {d.conversation.outcome_detail && (
             <p className="text-sm"><strong>Judge's reason:</strong> {d.conversation.outcome_detail.reason || "none given"}
               {d.conversation.outcome_detail.confidence != null && <> (confidence {Math.round(d.conversation.outcome_detail.confidence * 100)}%)</>}</p>
           )}
+          <div className="rounded-lg border border-slate-300 p-3">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" disabled={!!rerun || saving !== null} onClick={() => setAsk(ask === "outcome" ? null : "outcome")}>Re-run analysis</Button>
+              <Button variant="secondary" disabled={!!rerun || saving !== null} onClick={() => setAsk(ask === "full" ? null : "full")}>Re-run incl. intents (second opinion)</Button>
+            </div>
+            {ask && (
+              <div role="alertdialog" aria-label="Confirm re-run" className="mt-2 text-sm">
+                <p>{ask === "full" ? "This asks the judges again what the caller wanted and how the call went." : "This asks the outcome judge again."} It spends a few LLM tokens, and the judge's answer may change. Your saved corrections are kept. Check the result before you sign off.</p>
+                <div className="mt-2 flex gap-2"><Button onClick={() => void rejudge(ask === "full")}>Yes, re-run</Button><Button variant="secondary" onClick={() => setAsk(null)}>Cancel</Button></div>
+              </div>
+            )}
+            {rerun && <p role="status" className="mt-2 text-sm">Re-running the judges, this can take a minute...</p>}
+          </div>
           {card("outcome", (
             <select aria-label="Outcome" className={inputCls} value={draft.outcome ?? ""} onChange={(e) => setDraft({ ...draft, outcome: e.target.value })}>
               {me.outcomes.map((o) => <option key={o} value={o}>{OUTCOME_LABEL[o] ?? o}</option>)}
@@ -229,6 +260,8 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
 export default function Call() {
   const { cid = "" } = useParams();
   const { data, error, reload } = useLoad(() => staffApi.call(cid), [cid]);
+  const waiting = !!data && !data.review.judged;
+  useEffect(() => { if (!waiting) return; const t = setInterval(() => void reload(), 5000); return () => clearInterval(t); }, [waiting, reload]);
   const lead = useLoad(() => (data ? staffApi.lead(data.lead.id) : Promise.resolve(null)), [data?.lead.id]);
   if (error) return <><ErrorNote>{error}</ErrorNote><p className="mt-3"><Link className="underline" to="/staff">Back to the queue</Link></p></>;
   if (!data) return <p role="status">Loading call...</p>;
