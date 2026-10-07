@@ -4,7 +4,7 @@ import Turnstile from "../components/Turnstile";
 import { Button, ErrorNote, Field, inputCls } from "../components/ui";
 import { ApiError, api, getToken, putFile } from "../lib/api";
 import { LIMITS, MAX_CONCURRENT_UPLOADS, TALK_TO_US_MAILTO, TURNSTILE_SITE_KEY } from "../lib/config";
-import { CONSENT_ANALYSE, CONSENT_KEEP } from "../lib/copy";
+import { CONSENT_ANALYSE } from "../lib/copy";
 import { countLabel, fmtDuration, fmtSize, probeDuration, slotsLeft, validateDuration, validateFile } from "../lib/validate";
 
 type Item = { id: string; file: File; duration: number | null; state: "queued" | "uploading" | "done" | "error"; progress: number; error?: string; fileId?: string };
@@ -15,7 +15,6 @@ export default function Start() {
   const nav = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", company: "", desc: "" });
   const [analyse, setAnalyse] = useState(false);
-  const [keep, setKeep] = useState(false);
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [items, setItems] = useState<Item[]>([]);
   const [notes, setNotes] = useState<string[]>([]);
@@ -99,7 +98,7 @@ export default function Start() {
     if (TURNSTILE_SITE_KEY && !captcha) { setFormError("Please wait for the bot check to finish, then try again."); return; }
     setBusy(true);
     try {
-      await api.createLead({ name: form.name.trim(), email: form.email.trim(), company: form.company.trim(), agent_description: form.desc.trim() || undefined, consent_analyse: true, consent_keep: keep, turnstile_token: captcha });
+      await api.createLead({ name: form.name.trim(), email: form.email.trim(), company: form.company.trim(), agent_description: form.desc.trim() || undefined, consent_analyse: true, turnstile_token: captcha });
       setStarted(true);
     } catch (e) {
       setFormError(e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
@@ -170,7 +169,6 @@ export default function Start() {
         <legend className="mb-2 text-lg font-semibold">3. Consent</legend>
         <label className="flex items-start gap-3"><input type="checkbox" className="mt-1 size-5" checked={analyse} onChange={(e) => setAnalyse(e.target.checked)} aria-required aria-invalid={errs.analyse ? true : undefined} /><span>{CONSENT_ANALYSE}</span></label>
         {errs.analyse && <p className="text-sm text-red-700">{errs.analyse}</p>}
-        <label className="flex items-start gap-3"><input type="checkbox" className="mt-1 size-5" checked={keep} onChange={(e) => setKeep(e.target.checked)} /><span>{CONSENT_KEEP}</span></label>
       </fieldset>
 
       <Turnstile onToken={setCaptcha} />

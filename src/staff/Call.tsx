@@ -159,7 +159,7 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
           <div className="sticky top-0 z-10 bg-white py-2">
             {d.audio_url
               ? <audio ref={audio} controls preload="metadata" src={d.audio_url} className="w-full" aria-label="Call audio" />
-              : <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm">Audio deleted: the lead declined to let us keep recordings.</p>}
+              : <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm">No audio: this recording was deleted (the lead asked for deletion, or retention ran).</p>}
           </div>
           <h2 id="tr" className="sr-only">Call analysis</h2>
           <div role="tablist" aria-label="Call analysis" className="mt-2 flex flex-wrap gap-1 border-b border-slate-300">

@@ -12,7 +12,7 @@ export const setTokenGetter = (f: () => Promise<string | null>) => { tokenGetter
 export type Me = { staff: true; email: string; reasons: string[]; outcomes: string[] };
 export type QueueRow = { id: string; company: string; email: string; name: string; status: string; calls: number; analysed: number; reviewed: number; created_at: string; delivered_at: string | null };
 export type LeadCallRow = { file_id: string; conversation_id: string | null; filename: string; stage: string; reason: string | null; duration_s: number | null; language: string | null; outcome_judged: boolean; reviewed_at: string | null; reviewed_by: string | null };
-export type LeadDetail = { id: string; name: string; email: string; company: string; agent_description: string | null; keep_consent: boolean; status: string; delivered_at: string | null; created_at: string; calls: LeadCallRow[] };
+export type LeadDetail = { id: string; name: string; email: string; company: string; agent_description: string | null; status: string; delivered_at: string | null; created_at: string; calls: LeadCallRow[] };
 export type TurnIntent = { intent_id: string; name: string; status: string; confidence: number | null };
 export type Turn = { idx: number; role: string; text: string; offset_sec: number; span_id: string; intents?: TurnIntent[] };
 export type IntentResult = { name: string; resolved: boolean; attempts: number | null; evidence_span_id: string | null };

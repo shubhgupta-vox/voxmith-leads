@@ -111,7 +111,7 @@ export default function Lead() {
         <dt className="font-semibold">Contact</dt><dd>{lead.name}, <span className="break-all">{lead.email}</span></dd>
         <dt className="font-semibold">Status</dt><dd>{STATUS_LABEL[lead.status] ?? lead.status}</dd>
         <dt className="font-semibold">Created</dt><dd>{fmtDate(lead.created_at)}</dd>
-        <dt className="font-semibold">Audio kept</dt><dd>{lead.keep_consent ? "Yes: the lead agreed we may keep the recordings." : "No: the lead declined, so audio is deleted after analysis."}</dd>
+        <dt className="font-semibold">Recordings</dt><dd>Kept: the lead agreed to this when submitting. They go only if the lead deletes their data.</dd>
         <dt className="font-semibold">About their agent</dt><dd>{lead.agent_description || "Not given."}</dd>
       </dl>
       <Analysis leadId={lead.id} version={lead.calls.map((c) => c.reviewed_at).join()} />

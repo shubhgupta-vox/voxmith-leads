@@ -16,7 +16,7 @@ export type Limits = { max_files: number; max_file_mb: number; max_call_minutes:
 export type LeadFile = { file_id: string; filename: string; size_bytes: number; uploaded: boolean; stage: FileStage; reason: string | null };
 export type Status = {
   status: LeadStatus; email: string; company: string; expected_delivery: string;
-  delivered_at: string | null; keep_consent: boolean; files: LeadFile[];
+  delivered_at: string | null; files: LeadFile[];
 };
 export type Presign = { file_id: string; upload_url: string; method: "PUT"; headers: Record<string, string>; expires_in_seconds: number };
 
@@ -54,7 +54,7 @@ async function req<T>(path: string, method: string, body?: unknown, auth = true)
 }
 
 export const api = {
-  async createLead(b: { name: string; email: string; company: string; agent_description?: string; consent_analyse: true; consent_keep: boolean; turnstile_token: string }) {
+  async createLead(b: { name: string; email: string; company: string; agent_description?: string; consent_analyse: true; turnstile_token: string }) {
     const r = await req<{ token: string; limits: Limits }>("/leads", "POST", b, false);
     setToken(r.token);
     return r;
