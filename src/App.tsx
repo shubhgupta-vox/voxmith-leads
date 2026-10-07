@@ -1,9 +1,13 @@
+import { Suspense, lazy } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Start from "./pages/Start";
 import Status from "./pages/Status";
 
-export default function App() {
+// Staff pages (and Clerk) load only when someone opens /staff, so the public bundle stays small.
+const Staff = lazy(() => import("./staff/Staff"));
+
+function Public() {
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-white focus:p-2">Skip to content</a>
@@ -23,5 +27,14 @@ export default function App() {
       </main>
       <footer className="border-t border-slate-200 py-4 text-center text-sm text-slate-600">VoxMith call analysis</footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/staff/*" element={<Suspense fallback={<p className="p-4" role="status">Loading...</p>}><Staff /></Suspense>} />
+      <Route path="*" element={<Public />} />
+    </Routes>
   );
 }
