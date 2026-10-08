@@ -36,3 +36,29 @@ Backend: branch `leads-3-pdf` (staff endpoints under `/api/v1/staff`).
 - Defaults chosen: the curve scores moods neutral 0, relieved +1, appreciative +2, confused/anxious -0.5, impatient -1, frustrated/resigned -2, hostile -3 on a fixed scale (state only, intensity not used); "worst mood" in the table is the lowest-scoring turn below neutral. Logic and tests: `src/lib/analysis.ts`.
 
 Placeholders to review: `src/lib/copy.ts` (consent wording), `src/lib/config.ts` (turnaround, demo URL, contact).
+
+## Operations (read this if you are taking over)
+
+**What this is.** A static website (Vite + React). It has no server of its own: it calls the VoxMith API
+(`https://api.voxmith.com`, repo `VoxMith/voxmith-backend`). Public pages: `/`, `/start`, `/status`. Staff pages: `/staff/*`.
+
+**Hosting (planned): Cloudflare Pages, connected to this GitHub repo.** Every merge to `main` redeploys.
+- Build command `npm run build`, output directory `dist`, env `NODE_VERSION=20`.
+- `public/_redirects` makes unknown paths serve `index.html` (so `/start`, `/status`, `/staff` work on refresh).
+- Build-time variables (Pages -> Settings -> Environment variables). They are baked into the build, so changing one needs a redeploy:
+  - `VITE_API_URL` = `https://api.voxmith.com`
+  - `VITE_TURNSTILE_SITE_KEY` = the Cloudflare Turnstile **site** key (public)
+  - `VITE_CLERK_PUBLISHABLE_KEY` = the Clerk publishable key (public). Never set `VITE_STAFF_AUTH_STUB` in production.
+- Domain: `analyze.voxmith.com`, a CNAME in AWS Route 53 (zone `voxmith.com`) pointing at the Pages project address.
+
+**Who can do what (keep this list true).**
+- Cloudflare account (hosting + Turnstile): owned by the company, at least two admins.
+- GitHub: org `VoxMith`, this repo needs at least two owners.
+- Staff access: backend env `STAFF_EMAILS` (in `infra/k8s/voxmith-backend/deployment.yaml` of the backend repo). To add someone, add their email and merge. They sign in with Clerk using that email.
+- Secrets are never in this repo: the Turnstile **secret** key lives in the Kubernetes secret `voxmith-backend` (key `turnstile_secret`).
+
+**Where to look when something breaks.**
+- Public form says "Bot check ..." -> Turnstile keys or hostname (the widget must list `analyze.voxmith.com`).
+- Staff login says not authorised -> the email is missing from `STAFF_EMAILS`, or the Clerk session token lacks the `email` claim (see Staff review above).
+- Uploads fail in the browser -> the S3 bucket CORS rule must allow `https://analyze.voxmith.com` (backend repo PR #23 has the commands).
+- Reports are emailed by hand for now (no email provider configured): download the PDF on the lead page, send it, then press "Mark as sent by hand".
