@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import CodeForm from "../components/CodeForm";
 import { Button, ErrorNote, LinkButton } from "../components/ui";
 import { ApiError, type Status, api, clearToken, getToken, setToken } from "../lib/api";
@@ -17,8 +16,7 @@ export default function StatusPage() {
   const [token, setTok] = useState<string | null>(() => { adoptTokenFromLink(); return getToken(); });
   const [s, setS] = useState<Status | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [gone, setGone] = useState<"deleted" | "unknown" | null>(null);
-  const [confirm, setConfirm] = useState(false);
+  const [gone, setGone] = useState<"unknown" | null>(null);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
@@ -36,12 +34,6 @@ export default function StatusPage() {
     return () => clearInterval(t);
   }, [s?.status, load]);
 
-  async function del() {
-    try { await api.deleteLead(); clearToken(); setTok(null); setS(null); setGone("deleted"); }
-    catch (e) { setErr(e instanceof ApiError ? e.message : "Could not delete. Please try again."); setConfirm(false); }
-  }
-
-  if (gone === "deleted") return <div className="fade-in space-y-3"><h1 className="text-2xl font-bold">Your data has been deleted</h1><p>We removed your recordings, transcripts and details. Thank you for trying VoxMith.</p><Link to="/" className="underline">Back to the start</Link></div>;
   if (!token) return (
     <div className="fade-in space-y-4">
       <h1 className="text-2xl font-bold">{gone === "unknown" ? "We couldn't find that submission" : "No submission on this device"}</h1>
@@ -85,18 +77,6 @@ export default function StatusPage() {
         <p>Have more than {LIMITS.maxFiles} calls? <a className="underline" href={TALK_TO_US_MAILTO}>Talk to us</a>.</p>
         <p>Want to see VoxMith on your live calls? <a className="underline" href={DEMO_URL}>Book a demo</a>.</p>
         <p className="text-sm text-slate-700">This page is private. Keep this link to come back: <Button variant="secondary" className="ml-1 min-h-9 px-3 py-1" onClick={() => { void navigator.clipboard?.writeText(link).then(() => setCopied(true)); }}>{copied ? "Copied" : "Copy private link"}</Button></p>
-      </section>
-
-      <section className="space-y-2 border-t border-slate-200 pt-4">
-        <h2 className="text-lg font-semibold">Delete my data</h2>
-        {!confirm ? (
-          <Button variant="secondary" onClick={() => setConfirm(true)}>Delete my data</Button>
-        ) : (
-          <div role="alertdialog" aria-label="Confirm deletion" className="space-y-3 rounded-lg border border-red-300 bg-red-50 p-4">
-            <p>This permanently deletes your recordings, transcripts and details, and cancels your report. It can't be undone.</p>
-            <div className="flex gap-2"><Button onClick={del} className="bg-red-700 hover:bg-red-800">Yes, delete everything</Button><Button variant="secondary" onClick={() => setConfirm(false)}>Cancel</Button></div>
-          </div>
-        )}
       </section>
     </div>
   );

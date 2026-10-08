@@ -66,7 +66,6 @@ export const api = {
   verify: (code: string) => req<{ verified: true }>("/lead/verify", "POST", { code }),
   resend: (turnstile_token: string) => req<{ sent: true }>("/lead/resend", "POST", { turnstile_token }),
   status: () => req<Status>("/lead/status", "GET"),
-  deleteLead: () => req<void>("/lead", "DELETE"),
 };
 
 /** PUT raw bytes with exactly the headers the server signed. XHR for upload progress. */

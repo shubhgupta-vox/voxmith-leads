@@ -40,7 +40,7 @@ function Public() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/staff/*" element={<Suspense fallback={<p className="p-4" role="status">Loading...</p>}><Staff /></Suspense>} />
+      <Route path="/staff/*" element={<Suspense fallback={<div className="grid min-h-screen place-items-center" role="status"><img src="/brand/mark.png" alt="VoxMith" width={64} height={58} className="h-14 w-auto animate-pulse" /></div>}><Staff /></Suspense>} />
       <Route path="*" element={<Public />} />
     </Routes>
   );
