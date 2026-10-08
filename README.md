@@ -42,17 +42,20 @@ Placeholders to review: `src/lib/copy.ts` (consent wording), `src/lib/config.ts`
 **What this is.** A static website (Vite + React). It has no server of its own: it calls the VoxMith API
 (`https://api.voxmith.com`, repo `VoxMith/voxmith-backend`). Public pages: `/`, `/start`, `/status`. Staff pages: `/staff/*`.
 
-**Hosting (planned): Cloudflare Pages, connected to this GitHub repo.** Every merge to `main` redeploys.
-- Build command `npm run build`, output directory `dist`, env `NODE_VERSION=20`.
-- `public/_redirects` makes unknown paths serve `index.html` (so `/start`, `/status`, `/staff` work on refresh).
-- Build-time variables (Pages -> Settings -> Environment variables). They are baked into the build, so changing one needs a redeploy:
+**Hosting (planned): AWS Amplify Hosting, connected to this GitHub repo** (same AWS account as the API and Route 53).
+Every merge to `main` redeploys. The build is described in `amplify.yml` (Node 20, `npm ci`, `npm run build`, output `dist`).
+- Unknown paths must serve `index.html` (so `/start`, `/status`, `/staff` work on refresh). Amplify ignores `public/_redirects`:
+  add ONE rewrite in Amplify -> App settings -> Rewrites and redirects: source address
+  `</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>`, target `/index.html`, type `200 (Rewrite)`.
+  (`_redirects` is kept for hosts that read it, e.g. Cloudflare Pages / Netlify.)
+- Build-time variables (Amplify -> Hosting -> Environment variables). They are baked into the build, so changing one needs a redeploy:
   - `VITE_API_URL` = `https://api.voxmith.com`
   - `VITE_TURNSTILE_SITE_KEY` = the Cloudflare Turnstile **site** key (public)
   - `VITE_CLERK_PUBLISHABLE_KEY` = the Clerk publishable key (public). Never set `VITE_STAFF_AUTH_STUB` in production.
-- Domain: `analyze.voxmith.com`, a CNAME in AWS Route 53 (zone `voxmith.com`) pointing at the Pages project address.
+- Domain: `analyze.voxmith.com`, added in Amplify -> Hosting -> Custom domains (it can create the Route 53 record and the HTTPS certificate itself).
 
 **Who can do what (keep this list true).**
-- Cloudflare account (hosting + Turnstile): owned by the company, at least two admins.
+- AWS account (hosting, API, DNS): company-owned, access through IAM, never one person. Cloudflare account (only the Turnstile bot-check widget): company-owned, at least two admins.
 - GitHub: org `VoxMith`, this repo needs at least two owners.
 - Staff access: backend env `STAFF_EMAILS` (in `infra/k8s/voxmith-backend/deployment.yaml` of the backend repo). To add someone, add their email and merge. They sign in with Clerk using that email.
 - Secrets are never in this repo: the Turnstile **secret** key lives in the Kubernetes secret `voxmith-backend` (key `turnstile_secret`).
