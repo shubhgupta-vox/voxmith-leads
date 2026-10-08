@@ -47,7 +47,7 @@ function FieldCard({ name, original, current, draft, reason, reasons, disabled, 
     <fieldset disabled={disabled} className="rounded-lg border border-slate-300 p-3 disabled:opacity-60">
       <legend className="px-1 font-semibold">{FIELD_LABEL[name]}</legend>
       <p className="text-sm text-slate-600">Judge said: <strong>{fmtValue(name, original[name])}</strong>
-        {wasCorrected && <> &middot; Currently: <strong className="text-brand">{fmtValue(name, current[name])}</strong> (corrected)</>}
+        {wasCorrected && <> &middot; Currently: <strong className="text-brand-dark">{fmtValue(name, current[name])}</strong> (corrected)</>}
       </p>
       <div className="mt-2">{children}</div>
       {changed && (
@@ -144,7 +144,7 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
 
   return (
     <>
-      <p className="text-sm"><Link className="text-brand underline" to={`/staff/leads/${d.lead.id}`}>{d.lead.company}</Link> / {d.call.filename}</p>
+      <p className="text-sm"><Link className="text-brand-dark underline" to={`/staff/leads/${d.lead.id}`}>{d.lead.company}</Link> / {d.call.filename}</p>
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold break-all">{d.call.filename}</h1>
         <div className="flex gap-2">
@@ -169,7 +169,7 @@ function Review({ d, cid, reload, ids }: { d: CallDetail; cid: string; reload: (
                   const i = TABS.indexOf(tab) + (e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0);
                   if (i !== TABS.indexOf(tab) && TABS[i]) { setTab(TABS[i]); setTimeout(() => document.getElementById(`tab-${TABS[i]}`)?.focus(), 0); }
                 }}
-                className={`min-h-11 rounded-t-lg px-3 font-semibold ${tab === t ? "border-x border-t border-slate-300 bg-white text-brand" : "text-slate-600 hover:bg-slate-50"}`}>{t}</button>
+                className={`min-h-11 rounded-t-lg px-3 font-semibold ${tab === t ? "border-x border-t border-slate-300 bg-white text-brand-dark" : "text-slate-600 hover:bg-slate-50"}`}>{t}</button>
             ))}
           </div>
           <div role="tabpanel" id="tabpanel" aria-labelledby={`tab-${tab}`} tabIndex={0} className="mt-3">

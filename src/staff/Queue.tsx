@@ -36,7 +36,7 @@ export default function Queue() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} onClick={() => nav(`/staff/leads/${r.id}`)} className="cursor-pointer border-b border-slate-200 hover:bg-slate-50">
-                  <th scope="row" className="px-2 py-3 font-medium"><a href={`/staff/leads/${r.id}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); nav(`/staff/leads/${r.id}`); }} className="text-brand underline">{r.company}</a></th>
+                  <th scope="row" className="px-2 py-3 font-medium"><a href={`/staff/leads/${r.id}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); nav(`/staff/leads/${r.id}`); }} className="text-brand-dark underline">{r.company}</a></th>
                   <td className="px-2 py-3 break-all">{r.email}</td>
                   <td className="px-2 py-3">{STATUS_LABEL[r.status] ?? r.status}</td>
                   <td className="px-2 py-3">{r.calls}</td>

@@ -56,8 +56,8 @@ function ReportPanel({ lead, reload }: { lead: LeadDetail; reload: () => Promise
       {preview && (
         <div className="mt-4">
           <p className="text-sm" role="status">{preview.ready ? "Report is complete: every call is signed off." : "Preview only: not ready to send yet (some calls are not signed off or still processing)."}
-            {" "}<a className="text-brand underline" href={preview.url} target="_blank" rel="noreferrer">Open in a new tab</a>{" "}
-            <a className="text-brand underline" href={preview.url} download={`voxmith-analysis-${lead.id.slice(0, 8)}.pdf`}>Download</a>
+            {" "}<a className="text-brand-dark underline" href={preview.url} target="_blank" rel="noreferrer">Open in a new tab</a>{" "}
+            <a className="text-brand-dark underline" href={preview.url} download={`voxmith-analysis-${lead.id.slice(0, 8)}.pdf`}>Download</a>
           </p>
           <iframe title="Report PDF preview" src={preview.url} className="mt-2 h-[70vh] w-full rounded-lg border border-slate-300" />
         </div>
@@ -84,7 +84,7 @@ function CallRow({ c }: { c: LeadCallRow }) {
   return (
     <tr className="border-b border-slate-200">
       <th scope="row" className="px-2 py-3 font-medium break-all">
-        {cid ? <Link className="text-brand underline" to={`/staff/calls/${cid}`}>{c.filename}</Link> : c.filename}
+        {cid ? <Link className="text-brand-dark underline" to={`/staff/calls/${cid}`}>{c.filename}</Link> : c.filename}
       </th>
       <td className="px-2 py-3">{fileLabel(c.stage as never, true)}{c.reason ? `: ${c.reason}` : ""}</td>
       <td className="px-2 py-3">{!cid ? "" : !judged ? <Chip tone="amber">Analysing</Chip> : <OutcomePill outcome={d?.review.effective?.outcome ?? null} />}</td>
@@ -105,7 +105,7 @@ export default function Lead() {
   if (!lead) return <p role="status">Loading lead...</p>;
   return (
     <>
-      <p className="text-sm"><Link className="text-brand underline" to="/staff">All leads</Link></p>
+      <p className="text-sm"><Link className="text-brand-dark underline" to="/staff">All leads</Link></p>
       <h1 className="mt-1 text-2xl font-bold">{lead.company}</h1>
       <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="font-semibold">Contact</dt><dd>{lead.name}, <span className="break-all">{lead.email}</span></dd>

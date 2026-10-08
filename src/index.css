@@ -1,13 +1,22 @@
 @import "tailwindcss";
 
+/* Brand: blue #026CFE (buttons, bars, focus; white text on it is 4.6:1), navy #13222C (text, dark sections).
+   brand-dark (#0258d6) is for links and hover: it passes AA for small text on white. */
 @theme {
-  --color-brand: #0258d6;
-  --color-brand-dark: #01459f;
+  --color-brand: #026cfe;
+  --color-brand-dark: #0258d6;
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #dbe9ff;
+  --color-brand-200: #b8d4ff;
+  --color-ink: #13222c;
+  --color-ink-soft: #1d3340;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-body { @apply bg-white text-slate-800 antialiased; }
-:focus-visible { outline: 3px solid #0258d6; outline-offset: 2px; border-radius: 4px; }
+body { @apply bg-white text-ink antialiased; }
+:focus-visible { outline: 3px solid #026cfe; outline-offset: 2px; border-radius: 4px; }
+/* On dark sections the blue ring would vanish: use a light one. */
+.on-dark :focus-visible { outline-color: #b8d4ff; }
 
 @media (prefers-reduced-motion: no-preference) {
   .fade-in { animation: fade-in 0.3s ease-out both; }

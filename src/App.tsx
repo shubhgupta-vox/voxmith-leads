@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { type ReactNode, Suspense, lazy } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Start from "./pages/Start";
@@ -7,25 +7,32 @@ import Status from "./pages/Status";
 // Staff pages (and Clerk) load only when someone opens /staff, so the public bundle stays small.
 const Staff = lazy(() => import("./staff/Staff"));
 
+const Page = ({ children }: { children: ReactNode }) => <div className="mx-auto w-full max-w-3xl px-4 py-8">{children}</div>;
+
 function Public() {
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-white focus:p-2">Skip to content</a>
-      <header className="border-b border-slate-200">
+      <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-lg font-bold text-brand">VoxMith</Link>
-          <Link to="/status" className="text-sm text-slate-700 underline">Check my status</Link>
+          <Link to="/" aria-label="VoxMith home"><img src="/brand/wordmark.png" alt="VoxMith" width={185} height={28} className="h-7 w-auto" /></Link>
+          <Link to="/status" className="text-sm font-medium text-brand-dark underline">Check my status</Link>
         </div>
       </header>
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+      <main id="main" className="flex-1">
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/start" element={<Start />} />
-          <Route path="/status" element={<Status />} />
-          <Route path="*" element={<p>Page not found. <Link className="underline" to="/">Go home</Link></p>} />
+          <Route path="/start" element={<Page><Start /></Page>} />
+          <Route path="/status" element={<Page><Status /></Page>} />
+          <Route path="*" element={<Page><p>Page not found. <Link className="text-brand-dark underline" to="/">Go home</Link></p></Page>} />
         </Routes>
       </main>
-      <footer className="border-t border-slate-200 py-4 text-center text-sm text-slate-600">VoxMith call analysis</footer>
+      <footer className="border-t border-slate-200 py-5">
+        <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 px-4 text-sm text-slate-600">
+          <img src="/brand/mark.png" alt="" width={22} height={20} className="h-5 w-auto" />
+          VoxMith call analysis
+        </div>
+      </footer>
     </div>
   );
 }
