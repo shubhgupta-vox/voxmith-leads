@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { contentTypeFor, countLabel, fillCode, slotsLeft, validateDuration, validateFile } from "./validate";
+import { contentTypeFor, countLabel, fillCode, slotsLeft, validateDuration, validateFile, validateStart } from "./validate";
+import { UPLOAD_NOTICE } from "./copy";
+
+describe("validateStart", () => {
+  const ok = { name: "Ann", email: "a@b.co", company: "Acme" };
+  it("needs no consent field", () => expect(validateStart(ok, 1)).toEqual({}));
+  it("flags missing fields and files", () => {
+    expect(Object.keys(validateStart({ name: " ", email: "x", company: "" }, 0)).sort()).toEqual(["company", "email", "files", "name"]);
+  });
+  it("the notice states what the user agrees to", () => expect(UPLOAD_NOTICE).toMatch(/analyse.*store the recordings.*send you the report.*delete everything/));
+});
 
 const f = (name: string, size = 1000, type = "") => ({ name, type, size });
 

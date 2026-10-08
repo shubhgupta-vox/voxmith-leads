@@ -20,6 +20,18 @@ export function validateFile(f: { name: string; type: string; size: number }, ex
   return null;
 }
 
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Start-page form errors by field (empty object = ok). No consent field: the notice above the button is the consent. */
+export function validateStart(f: { name: string; email: string; company: string }, fileCount: number): Record<string, string> {
+  const er: Record<string, string> = {};
+  if (!f.name.trim()) er.name = "Enter your name.";
+  if (!EMAIL.test(f.email.trim())) er.email = "Enter a valid work email.";
+  if (!f.company.trim()) er.company = "Enter your company.";
+  if (!fileCount) er.files = "Add at least one call.";
+  return er;
+}
+
 export const countLabel = (n: number, max = LIMITS.maxFiles) => `${n} of ${max}`;
 export const slotsLeft = (n: number, max = LIMITS.maxFiles) => Math.max(0, max - n);
 
