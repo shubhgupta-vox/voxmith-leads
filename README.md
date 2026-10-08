@@ -26,7 +26,7 @@ Backend: branch `leads-3-pdf` (staff endpoints under `/api/v1/staff`).
 - "Send report" answers honestly when the backend has no email provider ("nothing was sent"): download the PDF, send it yourself, then "Mark as sent by hand".
 - Keyboard shortcuts on the call page (press `?` for the overlay; none fire while typing in a field): `j`/`k` next/previous call of the lead, `Space` play/pause, `[` `]` seek -/+5 s, `1`-`4` outcome (resolved / handed off / dropped / no request) and focus its reason picker, `e` toggle escalated, `r` mark reviewed.
 - Dev auth stub: `VITE_STAFF_AUTH_STUB=1 npm run dev` skips Clerk and sends no token, for use against a local backend whose `current_user` dependency is overridden. It only works when `import.meta.env.DEV` is true, so production builds ignore it.
-- Audio: `audio_url` comes from the backend (S3 presigned, or the local dev route). `null` shows "audio deleted" (the lead declined keep-consent).
+- Audio: `audio_url` comes from the backend (S3 presigned, or the local dev route). `null` means the recording was deleted (delete-my-data or retention).
 
 ### Analysis views (data from `GET /staff/leads/:id/analytics` and `GET /staff/calls/:id`)
 
