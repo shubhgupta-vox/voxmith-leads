@@ -44,8 +44,13 @@ Placeholders to review: `src/lib/copy.ts` (consent wording), `src/lib/config.ts`
 
 **Hosting: AWS Amplify Hosting, in the company AWS account, connected to this GitHub repo.** Every merge to `main` redeploys.
 - The build is defined in `amplify.yml` (Node 20, `npm ci`, `npm run build`, output `dist`).
-- Unknown paths must serve `index.html` (so `/start`, `/status`, `/staff` work on refresh). In Amplify: App -> Hosting -> Rewrites and redirects, one rule:
-  source `</^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>`, target `/index.html`, type `200 (Rewrite)`.
+- Unknown paths must serve `index.html` (so `/start`, `/status`, `/staff` work on refresh). In Amplify: App -> Hosting -> Rewrites and redirects -> Open text editor, paste:
+  ```json
+  [
+    { "source": "/<*>", "status": "404-200", "target": "/index.html" }
+  ]
+  ```
+  (Real files are served as normal; only a path with no file behind it falls back to `index.html`.)
 - Build-time variables (App -> Hosting -> Environment variables). They are baked into the build, so changing one needs a redeploy:
   - `VITE_API_URL` = `https://api.voxmith.com`
   - `VITE_TURNSTILE_SITE_KEY` = the Cloudflare Turnstile **site** key (public)
