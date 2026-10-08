@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import NeedsConnection from "../components/NeedsConnection";
 import { ErrorNote } from "../components/ui";
 import { judgeNote, nOfD, pct } from "../lib/analysis";
 import type { Analytics } from "../lib/staffApi";
@@ -64,9 +65,10 @@ function Body({ a }: { a: Analytics }) {
         <Tile label="Repair rate" value={pct(r.repair_rate.value)} sub={`${nOfD(r.repair_rate.num, r.repair_rate.den)}; ${fixes.events} fix, ${redos.events} redo`} def={r.repair_rate.definition} />
         <Tile label="Effort to resolution" value={effort(rev.effort.value)} sub={nOfD(rev.effort.den, rev.effort.den, "resolved requests")} def={r.effort.definition} note={judgeNote(rev.effort.value, r.effort.value, effort)} />
         <Tile label="Frustrated callers" value={pct(r.frustrated_rate.value)} sub={nOfD(r.frustrated_rate.num, r.frustrated_rate.den)} def={r.frustrated_rate.definition} />
-        <Tile label="Phantom actions" value={r.phantom_rate.value == null ? "Not measurable" : pct(r.phantom_rate.value)} def={r.phantom_rate.note ?? r.phantom_rate.definition} />
+        {r.phantom_rate.value != null && <Tile label="Phantom actions" value={pct(r.phantom_rate.value)} def={r.phantom_rate.note ?? r.phantom_rate.definition} />}
         <Tile label="Handed to a human" value={String(rev.escalations)} sub={`${rev.escalations === 1 ? "call" : "calls"} escalated (signed off)`} def="Calls where a person took over from the agent." />
       </div>
+      {r.phantom_rate.value == null && <NeedsConnection className="mt-3" />}
       {(fixes.events > 0 || redos.events > 0) && (
         <p className="mt-2 text-sm text-slate-700">Repairs: fix = caller corrects the agent ({Object.entries(fixes.subtypes).filter(([, n]) => n).map(([k, n]) => `${k.replace(/_/g, " ")} ${n}`).join(", ") || "none"}); redo = caller repeats themselves ({Object.entries(redos.subtypes).filter(([, n]) => n).map(([k, n]) => `${k.replace(/_/g, " ")} ${n}`).join(", ") || "none"}).</p>
       )}
@@ -127,7 +129,7 @@ function Body({ a }: { a: Analytics }) {
             {auto.needs_attention.map((n) => (
               <li key={n.conversation_id} className="rounded-lg border border-slate-200 p-3 text-sm">
                 <div className="flex flex-wrap items-center gap-2"><OutcomePill outcome={n.outcome} /><strong>{n.intent || "No request"}</strong>
-                  <Link className="ml-auto text-brand underline" to={`/staff/calls/${n.conversation_id}`}>Open call</Link></div>
+                  <Link className="ml-auto text-brand-dark underline" to={`/staff/calls/${n.conversation_id}`}>Open call</Link></div>
                 <p className="mt-1 text-slate-700">{n.reason}</p>
               </li>))}
           </ul>

@@ -1,3 +1,4 @@
+import NeedsConnection from "../components/NeedsConnection";
 import { Chip, OutcomePill } from "./Analysis";
 import { curvePoints, gradeLabel, mmss, quoteAt, sentimentByIdx, stateScore, zeroY } from "../lib/analysis";
 import type { CallDetail } from "../lib/staffApi";
@@ -57,7 +58,7 @@ export function OverviewTab({ d }: Pick<Props, "d">) {
 
       <section aria-labelledby="ov-ph">
         <h3 id="ov-ph" className="font-bold">Claimed actions with no matching tool call</h3>
-        <p className="text-sm">{od?.phantom_actions == null ? "Can't tell: this call has no tool trace, because it is a recording." : od.phantom_actions.length ? `${od.phantom_actions.length} found.` : "None found."}</p>
+        {od?.phantom_actions == null ? <NeedsConnection className="mt-1" /> : <p className="text-sm">{od.phantom_actions.length ? `${od.phantom_actions.length} found.` : "None found."}</p>}
       </section>
 
       <section aria-labelledby="ov-auto">
