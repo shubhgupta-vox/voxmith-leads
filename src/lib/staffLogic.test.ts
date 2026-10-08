@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { buildCorrection, changedFields, fmtValue, neighbour, reportBlocker, reviewableIds, saveBlocker, shortcutFor, type Fields } from "./staffLogic";
+import { buildCorrection, changedFields, fmtValue, neighbour, reportBlocker, reviewableIds, saveBlocker, shortcutFor, staffReturnUrl, type Fields } from "./staffLogic";
+
+describe("staffReturnUrl", () => {
+  it("keeps the deep link and query", () => {
+    expect(staffReturnUrl({ pathname: "/staff/leads/abc", search: "?tab=calls" })).toBe("/staff/leads/abc?tab=calls");
+    expect(staffReturnUrl({ pathname: "/staff", search: "" })).toBe("/staff");
+  });
+  it("falls back to /staff outside the staff area", () => {
+    expect(staffReturnUrl({ pathname: "/", search: "" })).toBe("/staff");
+    expect(staffReturnUrl({ pathname: "/staffer", search: "" })).toBe("/staff");
+  });
+});
 
 const cur: Fields = { outcome: "dropped", escalated: false, intents: [{ name: "Book", resolved: false }], sentiment: "frustrated" };
 

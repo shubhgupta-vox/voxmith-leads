@@ -1,6 +1,7 @@
 import { ClerkProvider, SignIn, SignedIn, SignedOut, UserButton, useAuth } from "@clerk/clerk-react";
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { staffReturnUrl } from "../lib/staffLogic";
 import { Button, ErrorNote } from "../components/ui";
 import { ApiError } from "../lib/api";
 import { CLERK_KEY } from "../lib/config";
@@ -30,9 +31,12 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-white focus:p-2">Skip to content</a>
-      <header className="border-b border-slate-200">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/staff" className="text-lg font-bold text-brand">VoxMith <span className="font-normal text-slate-600">staff</span></Link>
+      <header className="on-dark bg-ink text-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5">
+          <Link to="/staff" className="flex items-center gap-3" aria-label="VoxMith staff home">
+            <img src="/brand/wordmark-white.png" alt="VoxMith" width={148} height={36} className="h-9 w-auto" />
+            <span className="rounded bg-brand px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">staff</span>
+          </Link>
           {STUB ? <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-900">dev auth stub</span> : <UserButton />}
         </div>
       </header>
@@ -77,14 +81,21 @@ function WithClerkToken() {
 }
 
 export default function Staff() {
+  const nav = useNavigate();
+  const loc = useLocation();
   if (STUB) return <Gate />;
   if (!CLERK_KEY) return <Shell><ErrorNote>Staff sign-in is not configured: set VITE_CLERK_PUBLISHABLE_KEY and rebuild.</ErrorNote></Shell>;
+  const back = staffReturnUrl(loc);
   return (
-    <ClerkProvider publishableKey={CLERK_KEY} afterSignOutUrl="/staff">
+    // Return to the exact staff URL that was open (e.g. /staff/leads/<id>), not Clerk's default "/" (the public landing page).
+    // routerPush/Replace go through react-router so Clerk's own navigation never does a full page load.
+    <ClerkProvider publishableKey={CLERK_KEY} afterSignOutUrl="/staff" signInForceRedirectUrl={back} signInFallbackRedirectUrl={back}
+      routerPush={(to) => nav(to)} routerReplace={(to) => nav(to, { replace: true })}>
       <SignedOut>
         <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 p-4">
-          <h1 className="text-xl font-bold">VoxMith staff sign-in</h1>
-          <SignIn routing="virtual" />
+          <img src="/brand/wordmark.png" alt="VoxMith" width={185} height={28} className="h-7 w-auto" />
+          <h1 className="text-xl font-bold">Staff sign-in</h1>
+          <SignIn routing="hash" forceRedirectUrl={back} />
         </main>
       </SignedOut>
       <SignedIn><WithClerkToken /></SignedIn>

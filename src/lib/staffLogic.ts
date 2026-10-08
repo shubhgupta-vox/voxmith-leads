@@ -90,6 +90,11 @@ export function neighbour(ids: string[], current: string, by: 1 | -1): string | 
   return i < 0 ? null : (ids[i + by] ?? null);
 }
 
+/** Where to send someone after Clerk sign-in: the staff URL they were on (deep link kept), never the hash or anything outside /staff. */
+export function staffReturnUrl(loc: { pathname: string; search: string }): string {
+  return loc.pathname === "/staff" || loc.pathname.startsWith("/staff/") ? loc.pathname + loc.search : "/staff";
+}
+
 /** Report can be sent only when something is analysed, nothing is still processing, and every analysed call is signed off. */
 export function reportBlocker(calls: { stage: string; reviewed_at: string | null }[]): string | null {
   const analysed = calls.filter((c) => c.stage === "analysed");
