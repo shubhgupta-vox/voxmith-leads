@@ -42,14 +42,16 @@ Placeholders to review: `src/lib/copy.ts` (consent wording), `src/lib/config.ts`
 **What this is.** A static website (Vite + React). It has no server of its own: it calls the VoxMith API
 (`https://api.voxmith.com`, repo `VoxMith/voxmith-backend`). Public pages: `/`, `/start`, `/status`. Staff pages: `/staff/*`.
 
-**Hosting (planned): Cloudflare Pages, connected to this GitHub repo.** Every merge to `main` redeploys.
-- Build command `npm run build`, output directory `dist`, env `NODE_VERSION=20`.
-- `public/_redirects` makes unknown paths serve `index.html` (so `/start`, `/status`, `/staff` work on refresh).
-- Build-time variables (Pages -> Settings -> Environment variables). They are baked into the build, so changing one needs a redeploy:
+**Hosting: AWS Amplify Hosting, in the company AWS account, connected to this GitHub repo.** Every merge to `main` redeploys.
+- The build is defined in `amplify.yml` (Node 20, `npm ci`, `npm run build`, output `dist`).
+- Unknown paths must serve `index.html` (so `/start`, `/status`, `/staff` work on refresh). In Amplify: App -> Hosting -> Rewrites and redirects, one rule:
+  source `</^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>`, target `/index.html`, type `200 (Rewrite)`.
+- Build-time variables (App -> Hosting -> Environment variables). They are baked into the build, so changing one needs a redeploy:
   - `VITE_API_URL` = `https://api.voxmith.com`
   - `VITE_TURNSTILE_SITE_KEY` = the Cloudflare Turnstile **site** key (public)
   - `VITE_CLERK_PUBLISHABLE_KEY` = the Clerk publishable key (public). Never set `VITE_STAFF_AUTH_STUB` in production.
-- Domain: `analyze.voxmith.com`, a CNAME in AWS Route 53 (zone `voxmith.com`) pointing at the Pages project address.
+- Domain: `analyze.voxmith.com`, added under App -> Hosting -> Custom domains. Zone `voxmith.com` is in the same AWS account's Route 53, so Amplify can create the DNS record and the HTTPS certificate. Do not let it touch the root `voxmith.com`: it is hosted elsewhere.
+- Cloudflare is used only for the Turnstile bot check (the widget lists `analyze.voxmith.com`); nothing is hosted there.
 
 **Who can do what (keep this list true).**
 - AWS account (Amplify hosting, Route 53, S3): the company account; keep at least two admins. Cloudflare account (Turnstile only): owned by the company, at least two admins.
