@@ -1,7 +1,7 @@
-/** Calm info block for metrics a recording cannot give: they come from traces, so we show this instead of a number. */
-export const NEEDS_CONNECTION_TEXT = "Claimed actions with no matching tool call, tool errors, response latency and cost per call are measured from traces, not from audio. Connect the agent with OpenTelemetry (or a supported framework) to get them.";
+/** Calm info block for metrics a conversation file cannot give: they come from traces, so we show this instead of a number. */
+export const NEEDS_CONNECTION_TEXT = "Claimed actions with no matching tool call, tool errors, response latency and cost per conversation are measured from traces, not from the conversation itself. Connect the agent with OpenTelemetry (or a supported framework) to get them.";
 
-const ITEMS = ["Claimed actions vs tool calls", "Tool failures and errors", "Response latency (p95)", "LLM cost per call and per resolved call"];
+const ITEMS = ["Claimed actions vs tool calls", "Tool failures and errors", "Response latency (p95)", "LLM cost per conversation and per resolved conversation"];
 
 export default function NeedsConnection({ className = "" }: { className?: string }) {
   return (

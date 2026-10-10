@@ -3,12 +3,13 @@ import { contentTypeFor, countLabel, fillCode, slotsLeft, validateDuration, vali
 import { UPLOAD_NOTICE } from "./copy";
 
 describe("validateStart", () => {
-  const ok = { name: "Ann", email: "a@b.co", company: "Acme" };
+  const ok = { name: "Ann", email: "a@b.co", company: "Acme", desc: "Books appointments" };
   it("needs no consent field", () => expect(validateStart(ok, 1)).toEqual({}));
   it("flags missing fields and files", () => {
-    expect(Object.keys(validateStart({ name: " ", email: "x", company: "" }, 0)).sort()).toEqual(["company", "email", "files", "name"]);
+    expect(Object.keys(validateStart({ name: " ", email: "x", company: "", desc: " " }, 0)).sort()).toEqual(["company", "desc", "email", "files", "name"]);
   });
-  it("the notice states what the user agrees to", () => expect(UPLOAD_NOTICE).toMatch(/analyse.*store the recordings.*send you the report.*delete everything/));
+  it("the notice states what the user agrees to", () => expect(UPLOAD_NOTICE).toMatch(/analyse them and send you the report.*delete everything/));
+  it("no longer mentions storing recordings or calls", () => expect(UPLOAD_NOTICE).not.toMatch(/store|recording|calls/i));
 });
 
 const f = (name: string, size = 1000, type = "") => ({ name, type, size });
@@ -16,6 +17,10 @@ const f = (name: string, size = 1000, type = "") => ({ name, type, size });
 describe("validateFile", () => {
   it("accepts mp3/wav/m4a", () => {
     for (const n of ["a.mp3", "b.WAV", "c.m4a"]) expect(validateFile(f(n), 0)).toBeNull();
+  });
+  it("accepts txt/json transcripts, with their own small size cap", () => {
+    for (const n of ["a.txt", "b.JSON"]) expect(validateFile(f(n), 0)).toBeNull();
+    expect(validateFile(f("a.txt", 301 * 1024), 0)).toMatch(/Too large/);
   });
   it("rejects other types, empty, oversize and the 11th file", () => {
     expect(validateFile(f("a.ogg"), 0)).toMatch(/Unsupported/);
