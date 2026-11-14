@@ -22,6 +22,7 @@ function Public() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/start" element={<Page><Start /></Page>} />
+          <Route path="/groundhog" element={<Suspense fallback={<p className="p-8" role="status">Loading...</p>}><Groundhog /></Suspense>} />
           <Route path="/status" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Page><p>Page not found. <Link className="text-brand-dark underline" to="/">Go home</Link></p></Page>} />
         </Routes>
@@ -40,8 +41,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/staff/*" element={<Suspense fallback={<div className="grid min-h-screen place-items-center" role="status"><img src="/brand/mark.png" alt="VoxMith" width={64} height={58} className="h-14 w-auto animate-pulse" /></div>}><Staff /></Suspense>} />
-      {/* Dark page with its own header/footer, so it lives outside the light Public layout. */}
-      <Route path="/groundhog" element={<Suspense fallback={<div className="min-h-screen bg-ink" role="status" />}><Groundhog /></Suspense>} />
       <Route path="*" element={<Public />} />
     </Routes>
   );
