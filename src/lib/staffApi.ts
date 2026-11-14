@@ -63,6 +63,11 @@ export type CallDetail = {
   violations_checked: boolean;
 };
 
+export type GroundhogSummary = { people: number; runs: number; runs_7d: number; people_7d: number; new_people_7d: number; series: { day: string; runs: number; new_people: number }[] };
+export type GroundhogInstall = { install_id: string; account_email: string | null; account_source: string; skill_version: string; run_count: number; top_count: number; scope: string; first_seen: string; last_seen: string };
+export type GroundhogParams = { q?: string; sort?: "last_seen" | "runs" | "first_seen"; order?: "asc" | "desc"; page?: number; page_size?: number };
+const qs = (p: GroundhogParams) => { const u = new URLSearchParams(); for (const [k, v] of Object.entries(p)) if (v !== undefined && v !== "") u.set(k, String(v)); const s = u.toString(); return s ? `?${s}` : ""; };
+
 async function raw(path: string, method = "GET", body?: unknown): Promise<Response> {
   const headers: Record<string, string> = {};
   const token = await tokenGetter().catch(() => null);
@@ -84,6 +89,10 @@ async function raw(path: string, method = "GET", body?: unknown): Promise<Respon
 const json = async <T>(path: string, method = "GET", body?: unknown) => (await raw(path, method, body)).json() as Promise<T>;
 
 export const staffApi = {
+  groundhogSummary: () => json<GroundhogSummary>("/groundhog/summary"),
+  groundhogInstalls: (p: GroundhogParams) => json<{ items: GroundhogInstall[]; total: number }>(`/groundhog/installs${qs(p)}`),
+  /** Same filters as the table, no paging; returns the CSV as a Blob (the helper adds the Bearer token). */
+  async groundhogCsv(p: Omit<GroundhogParams, "page" | "page_size">) { return (await raw(`/groundhog/installs.csv${qs(p)}`)).blob(); },
   me: () => json<Me>("/me"),
   queue: () => json<QueueRow[]>("/leads"),
   lead: (id: string) => json<LeadDetail>(`/leads/${id}`),
