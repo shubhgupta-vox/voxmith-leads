@@ -33,7 +33,21 @@ export const BAR_BLOCKS = 20;
 export const barLen = (count: number, top: number) => Math.max(1, Math.round((count / top) * BAR_BLOCKS));
 export const bar = (n: number) => "█".repeat(n);
 
+/** Every command and option the skill accepts (skills/groundhog/SKILL.md). Plugin users type
+ * /groundhog:groundhog, plain-install users type /groundhog: the words after it are the same. */
+export const COMMANDS: { cmd: string; what: string }[] = [
+  { cmd: "", what: "Asks what to check: all your sessions (recommended), this project only, or this session only." },
+  { cmd: " all", what: "Check every session on this computer. Skips the question." },
+  { cmd: " project", what: "Only the sessions of the project you're in." },
+  { cmd: " session", what: "Only the session you're in now." },
+  { cmd: " 30", what: "Only the last 30 days (any number works; default is 90). Mix with a scope: all 30." },
+  { cmd: " status", what: "Shows exactly what Groundhog sends to VoxMith, and whether that's on." },
+  { cmd: " off", what: "Stops telling VoxMith anything. Remembered. The scan still works." },
+  { cmd: " on", what: "Turns it back on." },
+];
+
 export const SAMPLE = {
+  since: "Sep 18",
   count: 23,
   quote: "Don't add comments to code I didn't ask you about",
   told: "Told 23 times across 4 projects since Sep 18 (last: Nov 12, 2 days ago).",
