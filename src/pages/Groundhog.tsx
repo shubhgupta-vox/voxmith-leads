@@ -114,7 +114,7 @@ export default function Groundhog() {
           <picture>
             {/* Phone-width render of the same report, so the text stays readable on small screens. */}
             <source media="(max-width: 640px)" srcSet="/groundhog/sample-report-mobile.png" width={390} height={2420} />
-            <img src="/groundhog/sample-report.png" alt="Sample report: 23 times 'Don't add comments to code I didn't ask you about', cost of 12 minutes and 46 extra messages, a weekly chart, the top 10 repeated instructions, where it happens most, and 5 lines for CLAUDE.md." width={760} height={2100} loading="lazy" className="h-auto w-full rounded-xl border border-slate-200 shadow-sm" />
+            <img src="/groundhog/sample-report.png" alt="Sample report: 23 times 'Don't add comments to code I didn't ask you about', cost of 12 minutes and 46 extra messages, a weekly chart, the top 10 repeated instructions, where it happens most, and 5 lines for CLAUDE.md." width={760} height={2100} loading="lazy" className="h-auto w-full rounded-xl shadow-md" />
           </picture>
         </div>
       </section>
