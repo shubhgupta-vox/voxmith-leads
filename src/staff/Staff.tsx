@@ -1,12 +1,13 @@
 import { ClerkProvider, SignIn, SignedIn, SignedOut, UserButton, useAuth } from "@clerk/clerk-react";
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { staffReturnUrl } from "../lib/staffLogic";
 import { Button, ErrorNote } from "../components/ui";
 import { ApiError } from "../lib/api";
 import { CLERK_KEY } from "../lib/config";
 import { type Me, setTokenGetter, staffApi } from "../lib/staffApi";
 import Call from "./Call";
+import Groundhog from "./Groundhog";
 import Lead from "./Lead";
 import Queue from "./Queue";
 
@@ -37,6 +38,11 @@ function Shell({ children }: { children: ReactNode }) {
             <img src="/brand/wordmark-white.png" alt="VoxMith" width={148} height={36} className="h-9 w-auto" />
             <span className="rounded bg-brand px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">staff</span>
           </Link>
+          <nav aria-label="Staff sections" className="ml-auto flex gap-1 text-sm">
+            {[["Leads", "/staff"], ["Groundhog", "/staff/groundhog"]].map(([label, to]) => (
+              <NavLink key={to} to={to} end className={({ isActive }) => `rounded px-2.5 py-1.5 font-medium ${isActive ? "bg-white/15" : "hover:bg-white/10"}`}>{label}</NavLink>
+            ))}
+          </nav>
           {STUB ? <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-900">dev auth stub</span> : <UserButton />}
         </div>
       </header>
@@ -66,6 +72,7 @@ function Gate() {
           <Route index element={<Queue />} />
           <Route path="leads/:id" element={<Lead />} />
           <Route path="calls/:cid" element={<Call />} />
+          <Route path="groundhog" element={<Groundhog />} />
           <Route path="*" element={<p>Page not found. <Link className="underline" to="/staff">Back to the queue</Link></p>} />
         </Routes>
       </Shell>

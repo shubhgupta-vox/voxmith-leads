@@ -5,6 +5,7 @@ import Start from "./pages/Start";
 
 // Staff pages (and Clerk) load only when someone opens /staff, so the public bundle stays small.
 const Staff = lazy(() => import("./staff/Staff"));
+const Groundhog = lazy(() => import("./pages/Groundhog"));
 
 const Page = ({ children }: { children: ReactNode }) => <div className="mx-auto w-full max-w-3xl px-4 py-8">{children}</div>;
 
@@ -21,6 +22,7 @@ function Public() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/start" element={<Page><Start /></Page>} />
+          <Route path="/groundhog" element={<Suspense fallback={<p className="p-8" role="status">Loading...</p>}><Groundhog /></Suspense>} />
           <Route path="/status" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Page><p>Page not found. <Link className="text-brand-dark underline" to="/">Go home</Link></p></Page>} />
         </Routes>
