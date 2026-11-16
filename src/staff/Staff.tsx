@@ -1,6 +1,6 @@
 import { ClerkProvider, SignIn, SignedIn, SignedOut, UserButton, useAuth } from "@clerk/clerk-react";
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
-import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { staffReturnUrl } from "../lib/staffLogic";
 import { Button, ErrorNote } from "../components/ui";
 import { ApiError } from "../lib/api";
@@ -28,7 +28,30 @@ export function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
   return { data, error, reload };
 }
 
-function Shell({ children }: { children: ReactNode }) {
+const TABS: [string, string][] = [["Leads", "/staff"], ["Groundhog", "/staff/groundhog"]];
+
+/** Section tabs. Leads stays selected on lead and session detail pages, not only the queue. */
+function StaffTabs() {
+  const { pathname } = useLocation();
+  const groundhog = pathname.startsWith("/staff/groundhog");
+  return (
+    <nav aria-label="Staff sections" className="bg-white text-ink">
+      <div className="mx-auto flex max-w-6xl gap-1 border-b border-slate-200 px-4">
+        {TABS.map(([label, to]) => {
+          const active = (to === "/staff/groundhog") === groundhog;
+          return (
+            <Link key={to} to={to} aria-current={active ? "page" : undefined}
+              className={`-mb-px border-b-2 px-3 py-2.5 text-sm font-semibold ${active ? "border-brand text-ink" : "border-transparent text-slate-600 hover:border-slate-300 hover:text-ink"}`}>
+              {label}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+function Shell({ children, tabs = false }: { children: ReactNode; tabs?: boolean }) {
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded focus:bg-white focus:p-2">Skip to content</a>
@@ -38,13 +61,9 @@ function Shell({ children }: { children: ReactNode }) {
             <img src="/brand/wordmark-white.png" alt="VoxMith" width={148} height={36} className="h-9 w-auto" />
             <span className="rounded bg-brand px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">staff</span>
           </Link>
-          <nav aria-label="Staff sections" className="ml-auto flex gap-1 text-sm">
-            {[["Leads", "/staff"], ["Groundhog", "/staff/groundhog"]].map(([label, to]) => (
-              <NavLink key={to} to={to} end className={({ isActive }) => `rounded px-2.5 py-1.5 font-medium ${isActive ? "bg-white/15" : "hover:bg-white/10"}`}>{label}</NavLink>
-            ))}
-          </nav>
           {STUB ? <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-900">dev auth stub</span> : <UserButton />}
         </div>
+        {tabs && <StaffTabs />}
       </header>
       <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
     </div>
@@ -67,7 +86,7 @@ function Gate() {
   if (!me) return <Shell><p role="status">Checking your access...</p></Shell>;
   return (
     <MeContext.Provider value={me}>
-      <Shell>
+      <Shell tabs>
         <Routes>
           <Route index element={<Queue />} />
           <Route path="leads/:id" element={<Lead />} />

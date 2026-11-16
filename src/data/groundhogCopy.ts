@@ -19,6 +19,8 @@ export const PRIVACY_LIST: string[] = [
 ];
 
 export const INSTALL = {
+  /** One command in a normal terminal: adds the marketplace and installs (tested on Claude Code 2.1.325, no GitHub login). */
+  oneLine: "claude plugin install groundhog --marketplace VoxMith/groundhog",
   plugin: [
     { which: "marketplace_add" as const, cmd: "/plugin marketplace add VoxMith/groundhog" },
     { which: "install" as const, cmd: "/plugin install groundhog@voxmith" },
@@ -26,7 +28,7 @@ export const INSTALL = {
   curl: "mkdir -p ~/.claude/skills && curl -fsSL https://github.com/VoxMith/groundhog/archive/refs/heads/main.tar.gz | tar -xz --strip-components=2 -C ~/.claude/skills groundhog-main/skills/groundhog",
 };
 
-export const TOO_OLD = "Needs a recent Claude Code. In a terminal run: claude update. Or use the 'just /groundhog' install, which works on older versions.";
+export const TOO_OLD = "If your terminal says the command or --marketplace is unknown, run claude update first, or use one of the ways below.";
 
 export const BAR_BLOCKS = 20;
 /** Spec rule: bar length = count / top count x 20 blocks, rounded, at least 1. */
