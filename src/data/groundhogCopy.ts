@@ -46,6 +46,7 @@ export const COMMANDS: { cmd: string; what: string }[] = [
   { cmd: " status", what: "Shows exactly what Groundhog sends to VoxMith, and whether that's on." },
   { cmd: " off", what: "Stops telling VoxMith anything. Remembered. The scan still works." },
   { cmd: " on", what: "Turns it back on." },
+  { cmd: " fresh", what: "Groups your instructions again from scratch. Normally Groundhog remembers its grouping, so every session gives the same answer." },
 ];
 
 export const SAMPLE = {
