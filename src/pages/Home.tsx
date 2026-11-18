@@ -8,6 +8,13 @@ const BOOK_URL = "https://calendly.com/manvendra-singh-voxmith/30min";
 
 const TOOLS: { to: string; tag: string; title: string; body: string; cta: string }[] = [
   {
+    to: "/burn",
+    tag: "Claude Code skill",
+    title: "Burn: what did your coding agent's failures cost you?",
+    body: "Finds the sessions where you corrected your agent, repeated yourself or gave up, and adds up what they cost: your resolution rate and how much of your usage went to failed sessions. Reads Claude Code and Codex history on your own computer.",
+    cta: "Get Burn",
+  },
+  {
     to: "/analyze",
     tag: "Free analysis",
     title: "See how your agent really handles customers",
@@ -59,7 +66,7 @@ export default function Home() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {TOOLS.map((t) => (
-              <Link key={t.to} to={t.to} className="group flex flex-col rounded-xl border border-slate-200 p-5 shadow-sm transition-shadow hover:border-brand hover:shadow-md">
+              <Link key={t.to} to={t.to} className="group flex flex-col rounded-xl border border-slate-200 p-5 shadow-sm transition-shadow hover:border-brand hover:shadow-md sm:first:col-span-2">
                 <span className="self-start rounded bg-brand-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-dark">{t.tag}</span>
                 <h3 className="mt-3 text-lg font-semibold leading-snug">{t.title}</h3>
                 <p className="mt-2 flex-1 text-sm text-slate-700">{t.body}</p>

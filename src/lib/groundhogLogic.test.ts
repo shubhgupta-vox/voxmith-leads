@@ -55,3 +55,7 @@ describe("shared sample card data", () => {
     expect(all).not.toContain("12 months");
   });
 });
+
+describe("burn copy", () => {
+  it("names the Burn CSV", () => expect(csvFilename(new Date("2026-11-17T10:00:00Z"), "burn")).toBe("burn-installs-2026-11-17.csv"));
+});

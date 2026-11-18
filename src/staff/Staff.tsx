@@ -7,7 +7,7 @@ import { ApiError } from "../lib/api";
 import { CLERK_KEY } from "../lib/config";
 import { type Me, setTokenGetter, staffApi } from "../lib/staffApi";
 import Call from "./Call";
-import Groundhog from "./Groundhog";
+import ToolInstalls from "./ToolInstalls";
 import Lead from "./Lead";
 import Queue from "./Queue";
 
@@ -28,17 +28,17 @@ export function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
   return { data, error, reload };
 }
 
-const TABS: [string, string][] = [["Leads", "/staff"], ["Groundhog", "/staff/groundhog"]];
+const TABS: [string, string][] = [["Leads", "/staff"], ["Groundhog", "/staff/groundhog"], ["Burn", "/staff/burn"]];
 
 /** Section tabs. Leads stays selected on lead and session detail pages, not only the queue. */
 function StaffTabs() {
   const { pathname } = useLocation();
-  const groundhog = pathname.startsWith("/staff/groundhog");
+  const tool = TABS.slice(1).find(([, to]) => pathname.startsWith(to))?.[1] ?? "/staff";
   return (
     <nav aria-label="Staff sections" className="bg-white text-ink">
       <div className="mx-auto flex max-w-6xl gap-1 border-b border-slate-200 px-4">
         {TABS.map(([label, to]) => {
-          const active = (to === "/staff/groundhog") === groundhog;
+          const active = to === tool;
           return (
             <Link key={to} to={to} aria-current={active ? "page" : undefined}
               className={`-mb-px border-b-2 px-3 py-2.5 text-sm font-semibold ${active ? "border-brand text-ink" : "border-transparent text-slate-600 hover:border-slate-300 hover:text-ink"}`}>
@@ -91,7 +91,8 @@ function Gate() {
           <Route index element={<Queue />} />
           <Route path="leads/:id" element={<Lead />} />
           <Route path="calls/:cid" element={<Call />} />
-          <Route path="groundhog" element={<Groundhog />} />
+          <Route path="groundhog" element={<ToolInstalls key="groundhog" tool="groundhog" />} />
+          <Route path="burn" element={<ToolInstalls key="burn" tool="burn" />} />
           <Route path="*" element={<p>Page not found. <Link className="underline" to="/staff">Back to the queue</Link></p>} />
         </Routes>
       </Shell>
