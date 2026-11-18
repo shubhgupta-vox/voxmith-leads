@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, ErrorNote } from "../components/ui";
 import { type GhSeriesPoint, chartSummary, csvFilename, dayLabel, shortId, showing, toBars } from "../lib/groundhogLogic";
-import { type GroundhogParams, staffApi } from "../lib/staffApi";
+import { type GroundhogInstall, type GroundhogParams, type Tool, staffApi } from "../lib/staffApi";
 import { fmtDate } from "./Queue";
 import { useLoad } from "./Staff";
 
@@ -32,21 +32,31 @@ function Chart({ title, series, k, noun }: { title: string; series: GhSeriesPoin
   );
 }
 
-export default function Groundhog() {
-  const summary = useLoad(() => staffApi.groundhogSummary(), []);
+const TOOL: Record<Tool, { name: string; metric: string; value: (r: GroundhogInstall) => string }> = {
+  groundhog: { name: "Groundhog", metric: "Top-repeat count", value: (r) => String(r.top_count ?? "") },
+  burn: { name: "Burn", metric: "Resolution rate", value: (r) => (r.resolution_rate == null ? "-" : `${r.resolution_rate}%${r.sessions_judged != null ? ` of ${r.sessions_judged}` : ""}`) },
+};
+
+/** Staff view of one free-tool skill's pings (/staff/groundhog, /staff/burn). */
+export default function ToolInstalls({ tool }: { tool: Tool }) {
+  const t = TOOL[tool];
+  const summary = useLoad(() => staffApi.toolSummary(tool), [tool]);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<NonNullable<GroundhogParams["sort"]>>("last_seen");
   const [page, setPage] = useState(1);
   const [csvErr, setCsvErr] = useState<string | null>(null);
-  const list = useLoad(() => staffApi.groundhogInstalls({ q: q.trim(), sort, order: "desc", page, page_size: PAGE_SIZE }), [q, sort, page]);
+  const list = useLoad(() => staffApi.toolInstalls(tool, { q: q.trim(), sort, order: "desc", page, page_size: PAGE_SIZE }), [tool, q, sort, page]);
   const total = list.data?.total ?? 0;
+  const toggle = async (id: string, hidden: boolean) => {
+    try { await staffApi.setHidden(id, hidden); void list.reload(); } catch (e) { setCsvErr(e instanceof Error ? e.message : "Couldn't change it. Please try again."); }
+  };
 
   const download = async () => {
     setCsvErr(null);
     try {
-      const url = URL.createObjectURL(await staffApi.groundhogCsv({ q: q.trim(), sort, order: "desc" }));
+      const url = URL.createObjectURL(await staffApi.toolCsv(tool, { q: q.trim(), sort, order: "desc" }));
       const a = document.createElement("a");
-      a.href = url; a.download = csvFilename(new Date()); a.click();
+      a.href = url; a.download = csvFilename(new Date(), tool); a.click();
       URL.revokeObjectURL(url);
     } catch (e) { setCsvErr(e instanceof Error ? e.message : "Download failed. Please try again."); }
   };
@@ -54,7 +64,7 @@ export default function Groundhog() {
   const s = summary.data;
   return (
     <>
-      <h1 className="text-2xl font-bold">Groundhog</h1>
+      <h1 className="text-2xl font-bold">{t.name}</h1>
       <p className="mt-1 text-sm text-slate-600">Emails come from the skill and are not verified. Treat counts as approximate.</p>
 
       {summary.error && <div className="mt-4"><ErrorNote>{summary.error}</ErrorNote><Button className="mt-2" variant="secondary" onClick={() => void summary.reload()}>Try again</Button></div>}
@@ -87,21 +97,27 @@ export default function Groundhog() {
 
       {list.error && <div className="mt-4"><ErrorNote>{list.error}</ErrorNote><Button className="mt-2" variant="secondary" onClick={() => void list.reload()}>Try again</Button></div>}
       {!list.data && !list.error && <p className="mt-4" role="status">Loading...</p>}
-      {list.data && !list.data.items.length && <p className="mt-4">{q.trim() ? "No one matches that search." : "No one has used Groundhog yet."}</p>}
+      {list.data && !list.data.items.length && <p className="mt-4">{q.trim() ? "No one matches that search." : `No one has used ${t.name} yet.`}</p>}
       {list.data && list.data.items.length > 0 && (
         <>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[44rem] text-left text-sm">
-              <caption className="sr-only">Groundhog installs</caption>
+              <caption className="sr-only">{t.name} installs</caption>
               <thead><tr className="border-b border-slate-300">
-                {["Account", "Runs", "Top-repeat count", "Skill version", "Scope used", "First run", "Last run"].map((h) => <th key={h} scope="col" className="px-2 py-2 font-semibold">{h}</th>)}
+                {["Account", "Runs", t.metric, "Skill version", "Scope used", "First run", "Last run", ...(tool === "burn" ? ["Leaderboard"] : [])].map((h) => <th key={h} scope="col" className="px-2 py-2 font-semibold">{h}</th>)}
               </tr></thead>
               <tbody>
                 {list.data.items.map((r) => (
                   <tr key={r.install_id} className="border-b border-slate-200">
                     <th scope="row" className="px-2 py-3 font-medium break-all">{r.account_email ?? <span className="text-slate-600">no account</span>} <span className="font-mono text-xs font-normal text-slate-600">{shortId(r.install_id)}</span></th>
-                    <td className="px-2 py-3">{r.run_count}</td><td className="px-2 py-3">{r.top_count}</td><td className="px-2 py-3">{r.skill_version}</td><td className="px-2 py-3">{r.scope}</td>
+                    <td className="px-2 py-3">{r.run_count}</td><td className="px-2 py-3">{t.value(r)}</td><td className="px-2 py-3">{r.skill_version}</td><td className="px-2 py-3">{r.scope}</td>
                     <td className="px-2 py-3">{fmtDate(r.first_seen)}</td><td className="px-2 py-3">{fmtDate(r.last_seen)}</td>
+                  {tool === "burn" && (
+                      <td className="px-2 py-3">
+                        <span className="mr-2">{r.hidden ? "Hidden" : r.listed ? (r.score != null ? `Score ${r.score}` : "Listed, < 20 sessions") : "Not listed"}</span>
+                        <Button variant="secondary" className="!min-h-8 !px-2 !py-0.5 text-xs" onClick={() => void toggle(r.install_id, !r.hidden)}>{r.hidden ? "Show" : "Hide"}</Button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

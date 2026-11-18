@@ -64,7 +64,9 @@ export type CallDetail = {
 };
 
 export type GroundhogSummary = { people: number; runs: number; runs_7d: number; people_7d: number; new_people_7d: number; series: { day: string; runs: number; new_people: number }[] };
-export type GroundhogInstall = { install_id: string; account_email: string | null; account_source: string; skill_version: string; run_count: number; top_count: number; scope: string; first_seen: string; last_seen: string };
+/** The free-tool skills that ping the backend; each has /staff/<tool>/{summary,installs,installs.csv}. */
+export type Tool = "groundhog" | "burn";
+export type GroundhogInstall = { install_id: string; account_email: string | null; account_source: string; skill_version: string; run_count: number; top_count?: number; resolution_rate?: number | null; sessions_judged?: number | null; score?: number | null; listed?: boolean; hidden?: boolean; scope: string; first_seen: string; last_seen: string };
 export type GroundhogParams = { q?: string; sort?: "last_seen" | "runs" | "first_seen"; order?: "asc" | "desc"; page?: number; page_size?: number };
 const qs = (p: GroundhogParams) => { const u = new URLSearchParams(); for (const [k, v] of Object.entries(p)) if (v !== undefined && v !== "") u.set(k, String(v)); const s = u.toString(); return s ? `?${s}` : ""; };
 
@@ -89,10 +91,11 @@ async function raw(path: string, method = "GET", body?: unknown): Promise<Respon
 const json = async <T>(path: string, method = "GET", body?: unknown) => (await raw(path, method, body)).json() as Promise<T>;
 
 export const staffApi = {
-  groundhogSummary: () => json<GroundhogSummary>("/groundhog/summary"),
-  groundhogInstalls: (p: GroundhogParams) => json<{ items: GroundhogInstall[]; total: number }>(`/groundhog/installs${qs(p)}`),
+  toolSummary: (tool: Tool) => json<GroundhogSummary>(`/${tool}/summary`),
+  toolInstalls: (tool: Tool, p: GroundhogParams) => json<{ items: GroundhogInstall[]; total: number }>(`/${tool}/installs${qs(p)}`),
   /** Same filters as the table, no paging; returns the CSV as a Blob (the helper adds the Bearer token). */
-  async groundhogCsv(p: Omit<GroundhogParams, "page" | "page_size">) { return (await raw(`/groundhog/installs.csv${qs(p)}`)).blob(); },
+  setHidden: (installId: string, hidden: boolean) => json<{ install_id: string; hidden: boolean }>(`/burn/installs/${encodeURIComponent(installId)}/hidden`, "POST", { hidden }),
+  async toolCsv(tool: Tool, p: Omit<GroundhogParams, "page" | "page_size">) { return (await raw(`/${tool}/installs.csv${qs(p)}`)).blob(); },
   me: () => json<Me>("/me"),
   queue: () => json<QueueRow[]>("/leads"),
   lead: (id: string) => json<LeadDetail>(`/leads/${id}`),

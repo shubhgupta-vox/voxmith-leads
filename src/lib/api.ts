@@ -53,7 +53,21 @@ async function req<T>(path: string, method: string, body?: unknown, auth = true)
   return data as T;
 }
 
+export type BoardAgent = "all" | "claude" | "codex";
+export type BoardRow = {
+  rank: number; email: string; score: number; resolution_rate: number; sessions_judged: number;
+  /** Money at API prices in US cents, as reported by the skill; null from older skill versions. */
+  failed_cost_cents: number | null; failed_share: number | null; cost_per_resolved_cents: number | null;
+  agent: string | null; last_run: string;
+};
+export type Board = { min_sessions: number; total_ranked: number; rows: BoardRow[] };
+export type BoardMe =
+  | { ranked: true; rank: number; of: number; better_than: number; score: number; email: string; around: (BoardRow & { me: boolean })[] }
+  | { ranked: false; min_sessions: number; sessions_judged: number | null; listed: boolean };
+
 export const api = {
+  burnBoard: (agent: BoardAgent) => req<Board>(`/burn/leaderboard?agent=${agent}`, "GET", undefined, false),
+  burnMe: (token: string) => req<BoardMe>(`/burn/leaderboard/me?t=${encodeURIComponent(token)}`, "GET", undefined, false),
   async createLead(b: { name: string; email: string; company: string; agent_description?: string; consent_analyse: true; turnstile_token: string }) {
     const r = await req<{ token: string; limits: Limits }>("/leads", "POST", b, false);
     setToken(r.token);

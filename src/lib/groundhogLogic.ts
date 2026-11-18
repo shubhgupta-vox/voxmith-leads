@@ -8,7 +8,7 @@ export function dayLabel(day: string): string {
   return `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]} ${d}`;
 }
 
-export const csvFilename = (today: Date) => `groundhog-installs-${today.toISOString().slice(0, 10)}.csv`;
+export const csvFilename = (today: Date, tool = "groundhog") => `${tool}-installs-${today.toISOString().slice(0, 10)}.csv`;
 
 export type Bar = { x: number; y: number; w: number; h: number; day: string; value: number };
 
