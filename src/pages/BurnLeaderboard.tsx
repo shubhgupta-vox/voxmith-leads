@@ -94,7 +94,7 @@ function MeBar({ me }: { me: BoardMe }) {
       ) : (
         <p className="text-sm">{me.listed
           ? `Not ranked yet: you have ${me.sessions_judged ?? 0} judged sessions, the board needs ${me.min_sessions}. Keep using your agent and run /burn again.`
-          : "Not on the board yet: your result goes public from your next /burn run."}</p>
+          : "You are off the board (you ran /burn off). To come back, run /burn on and then /burn."}</p>
       )}
     </div>
   );
