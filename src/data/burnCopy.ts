@@ -8,7 +8,7 @@ export const DISCLOSURE = "Burn sends your end result (resolution rate, sessions
 export const PRIVACY_LIST: string[] = [
   "Burn reads your coding-agent history (Claude Code or Codex, whichever you run it in) on your own computer. A Python script does all the counting; no AI model reads your sessions for it, and nothing leaves your machine except the ping below.",
   "Each time you run it, Burn sends VoxMith: the Burn version, how many times you have run it, the email of the account that ran it (your Claude Code account email, or your git email if there is none), your resolution rate, how many sessions were judged and resolved, what your failed sessions cost and your cost per resolved session (at API prices), which agent (Claude Code or Codex), whether you checked the whole computer or one project, and a random install ID.",
-  "Your email and end result appear on the public Burn leaderboard from the run after you first see this notice, once 20 sessions are judged. /burn off takes you off it.",
+  "Your email and end result appear on the public Burn leaderboard once 20 sessions are judged. /burn off takes you off it.",
   DISCLOSURE,
   "Opt out any time: /burn off (also takes you off the leaderboard), or set BURN_NO_PING=1 or DO_NOT_TRACK=1.",
   `To have your data deleted, email ${CONTACT_EMAIL}.`,
