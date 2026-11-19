@@ -35,9 +35,9 @@ export const COMMANDS: { cmd: string; what: string }[] = [
 ];
 
 export const RULES: [string, string][] = [
-  ["Corrected", "You corrected the agent 2 or more times: a message like “no,”, “that's wrong”, “revert that” right after it answered. “No, that looks good” doesn't count, and pressing Esc alone doesn't either: the message you type after it decides."],
-  ["Repeated yourself", "You gave the same instruction (a do or don't rule, or 5+ words) in 2 or more messages. Routine commands like “run the tests” don't count."],
-  ["Gave up", "Your last message was “forget it”, “I'll do it myself” or “I'll handle this manually” (not “never mind, found it”), or a correction the agent never answered."],
+  ["Corrected", "You told it “no”, “that's wrong” or “revert that” 2+ times."],
+  ["Repeated yourself", "You gave the same instruction 2+ times."],
+  ["Gave up", "You ended with “forget it” or “I'll do it myself”."],
 ];
 
 export const SAMPLE = {

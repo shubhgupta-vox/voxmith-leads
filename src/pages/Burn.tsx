@@ -32,9 +32,9 @@ Full report opened in your browser.`}</span>
 }
 
 const STEPS: [string, string][] = [
-  ["Reads your history", "Goes through your sessions on your own computer: Claude Code history in Claude Code, Codex history in Codex. Your current session is left out."],
-  ["Judges every session", "Fixed rules, not an AI guess, mark the sessions where you corrected the agent, repeated yourself or gave up. Same computer, same answer."],
-  ["Adds up the cost", "Counts each session's tokens once and prices them at API rates: your resolution rate, what failures burned, and the cost per resolved session."],
+  ["Reads your history", "Your sessions, on your own computer."],
+  ["Judges every session", "Fixed rules spot where you corrected the agent, repeated yourself or gave up."],
+  ["Adds up the cost", "Prices it all at API rates."],
 ];
 
 export default function Burn() {
@@ -69,14 +69,13 @@ export default function Burn() {
 
         <section aria-label="More details" className="border-t border-slate-200">
           <Fold title="What counts as a failed session">
-            <p>A session is judged when you wrote at least 2 messages in it. It failed if any of these is true:</p>
+            <p>A session fails if:</p>
             <dl className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200">
               {RULES.map(([k, v]) => (
                 <div key={k} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[10rem_1fr] sm:gap-4"><dt className="font-semibold text-ink">{k}</dt><dd>{v}</dd></div>
               ))}
             </dl>
-            <p>Shorter sessions are not judged, but their cost is in the totals. Your usage that went to failed sessions = their cost / the cost of all sessions. Cost per resolved session = total cost / resolved sessions.</p>
-            <p>Why API prices: it is the one public price list everyone shares, so your numbers compare across people and plans. On a subscription (Claude Pro or Max, ChatGPT) you paid a flat fee instead, which is why Burn leads with the share of your usage, not dollars. A model with no published price is counted in tokens, never guessed.</p>
+            <p>Why API prices: it's the one price list everyone shares, so numbers compare across people and plans.</p>
           </Fold>
           <Fold title="Other ways to install">
             <p>{TOO_OLD}</p>
