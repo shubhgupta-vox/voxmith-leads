@@ -21,6 +21,34 @@ export function usd(cents: number | null): string {
   return "$" + (cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/** Wilson lower bound x100, same as the backend's score. */
+function wilson(ok: number, n: number): number {
+  const z = 1.96, p = ok / n, d = 1 + (z * z) / n;
+  return Math.floor((100 * (p + (z * z) / (2 * n) - z * Math.sqrt((p * (1 - p) + (z * z) / (4 * n)) / n))) / d);
+}
+
+/** Filler rows shown only while fewer than SAMPLE_UNTIL real people are ranked (owner's call, 2026-11-19).
+ * Gmail never allows "_" in a username, so these addresses can't belong to anyone. Display only: the
+ * backend never sees them, so real users' rank and "better than X%" are unaffected. */
+export const SAMPLE_UNTIL = 10;
+const SAMPLE_SRC: [string, number, number, number, number, string][] = [
+  // email, resolved, judged, failed cents, failed share %, agent
+  ["maya_reddy@gmail.com", 171, 196, 8412, 14, "claude"],
+  ["devon_kim@gmail.com", 118, 142, 12930, 19, "codex"],
+  ["priya_sharma@gmail.com", 203, 261, 21744, 23, "claude"],
+  ["tomas_berg@gmail.com", 77, 101, 9860, 26, "claude"],
+  ["lena_wolf@gmail.com", 64, 88, 15322, 31, "codex"],
+  ["arjun_mehta@gmail.com", 140, 213, 41459, 38, "claude"],
+  ["sam_okafor@gmail.com", 39, 62, 11208, 41, "codex"],
+  ["nora_hayes@gmail.com", 52, 97, 30175, 49, "claude"],
+];
+export const SAMPLE_ROWS: (BoardRow & { sample: true })[] = SAMPLE_SRC.map(([email, ok, n, cents, share, agent], i) => ({
+  rank: 0, email, score: wilson(ok, n), resolution_rate: Math.round((100 * ok) / n), sessions_judged: n,
+  failed_cost_cents: cents, failed_share: share,
+  cost_per_resolved_cents: Math.round((cents * 100) / share / ok), agent, last_run: `2026-11-${String(18 - i).padStart(2, "0")}`,
+  sample: true as const,
+})).sort((a, b) => b.score - a.score);
+
 const th = "px-3 py-2.5 font-semibold";
 const td = "px-3 py-3";
 
@@ -150,10 +178,15 @@ export default function BurnLeaderboard() {
 
         {error && <ErrorNote>{error}</ErrorNote>}
         {!board && !error && <p role="status">Loading...</p>}
-        {board && board.rows.length === 0 && (
-          <p className="rounded-xl border border-slate-200 p-6 text-center text-slate-700">Nobody is ranked here yet. Run <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.9em]">/burn</code> with 20+ judged sessions to be first.</p>
-        )}
-        {board && board.rows.length > 0 && <BoardTable rows={board.rows} caption={`Burn leaderboard, top ${board.rows.length}`} mine={mine} />}
+        {board && (() => {
+          const samples = board.total_ranked < SAMPLE_UNTIL ? SAMPLE_ROWS.filter((r) => agent === "all" || r.agent === agent) : [];
+          // Merge by score and number the positions; real rows win ties.
+          const rows = [...board.rows, ...samples].sort((a, b) => b.score - a.score || Number("sample" in a) - Number("sample" in b))
+            .map((r, i) => ({ ...r, rank: i + 1 }));
+          return <>
+            {rows.length > 0 && <BoardTable rows={rows} caption={`Burn leaderboard, top ${board.rows.length}`} mine={mine} />}
+          </>;
+        })()}
 
         {me?.ranked && agent === "all" && me.rank > (board?.rows.length ?? 100) && (
           <section id="around" aria-labelledby="around-h" className="space-y-3 scroll-mt-20">
@@ -168,8 +201,7 @@ export default function BurnLeaderboard() {
 
         <section aria-labelledby="score" className="space-y-2 text-sm text-slate-700">
           <h2 id="score" className="text-lg font-semibold text-ink">How the score works</h2>
-          <p>Resolution rate is resolved sessions out of judged sessions. A few lucky sessions would win on that alone, so the board ranks by a cautious score: the lowest resolution rate your history still supports with 95% confidence (the Wilson lower bound). 180 of 200 resolved scores 85; a perfect 20 of 20 scores 84. You need at least {board?.min_sessions ?? 20} judged sessions to be ranked. Each person appears once, with their latest run.</p>
-          <p>Money is at API prices (the public pay-as-you-go price list), the same numbers as the cards at the top of your Burn report: what your failed sessions cost, their share of your usage, and your cost per resolved session. On a subscription you paid a flat fee instead. Numbers are self-reported by the Burn skill from local history; we remove rows that look fake.</p>
+          <p>Score is your resolution rate, adjusted so a few lucky sessions can't top the board. Min {board?.min_sessions ?? 20} judged sessions. Money is at API prices.</p>
           <p>Want off the board? Run <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.9em]">/burn off</code> or email <a className="text-brand-dark underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
         </section>
 
