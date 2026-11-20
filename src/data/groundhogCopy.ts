@@ -2,7 +2,7 @@
 // voxmith-env/GROUNDHOG_SPEC.md (made-up data). Change it here and the card follows.
 
 // The owner must confirm this address (privacy contact and "Contact us"). One place only.
-export const CONTACT_EMAIL = "hello@voxmith.com";
+export const CONTACT_EMAIL = "manvendra.singh@voxmith.com";
 export const APP_URL = "https://app.voxmith.com";
 
 /** Character-identical to the sentence in SKILL.md and the README. */
